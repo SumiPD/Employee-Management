@@ -34,11 +34,5 @@ class RegisterMail extends Mailable
         return $this->markdown('register_mail',['body'=>$body])
               ->with('mailData', $this->mailData);
         
-    //     $email =  $this->subject($this->details['subject'])
-    //                 ->view('register_mail')
-    //                 ->from($this->details['from'])
-    //                 ->to($this->details['to']);
-    //                 // dd($email) ;      
-    //    return $email;
     }
 }
