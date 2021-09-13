@@ -13,11 +13,14 @@ use App\Http\Controllers\UserController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('/employee');
+// });
+Route::get('/', [App\Http\Controllers\UserController::class,'index']);
+
 Route::resource('employee', UserController::class);
 Route::get('/view_employee', [App\Http\Controllers\UserController::class,'view']);
 // Route::get('employee/{id}/edit', [App\Http\Controllers\UserController::class,'edit']);
 // Route::get('/add_employee',[App\Http\Controllers\UserController::class,'index']);
-// Route::post('employee/save',[App\Http\Controllers\UserController::class,'create'])->name('save');
+Route::post('update/{id}',[App\Http\Controllers\UserController::class,'updates'])->name('employee.updates');
+Route::get('delete/{id}',[App\Http\Controllers\UserController::class,'delete'])->name('employee.delete');

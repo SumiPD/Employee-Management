@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\Designation;
 use DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use App\Mail\RegisterMail;
+use Mail;
 
 class UserController extends Controller
 {
@@ -47,12 +50,12 @@ class UserController extends Controller
         $designation = $request->designation;
         $photo = $request->photo;
 
-        $validator  = \Validator::make($request->all(), [
+        request()->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'photo' => ['image|mimes:jpg,png,jpeg,gif,svg|max:100'],
-        ]);
-        
+            'photo' => ['mimes:jpg,png,jpeg,gif,svg|max:5120'],
+        ]);     
+
         if(!empty($photo)){
 
             $img= time().'.'.$request->photo->extension();
@@ -66,22 +69,22 @@ class UserController extends Controller
         $user->email = $email;
         $user->designation  =$designation;
         $user->photo =$img;
-        // $user->save();
+        $user->save();
         $random_password = \Str::random(12);
 
-        \Mail::to('sumidevadas@gmail.com')
-                ->send("test");
-        // $details = [
-        //     'to' => $email,
-        //     'from' => env('MAIL_USERNAME'),
-        //     'subject' => 'Test registration',
-        //     'title' => 'Test registration',
-        //     'body'  => 'Your account has been created. Password is: '.$random_password
-        // ];
+        $email = $email;
+        $mailData = [
+            'title' => 'User Registered',
+            'url' => 'https://www.remotestack.io',
+            'body'  => 'Your account has been created Password is:'.$random_password
+        ];
+  
+        Mail::to($email)->send(new RegisterMail($mailData));
 
+        // dd("Mail sent!");
+        return redirect()->back()->with('success','inserted');
 
-        // \Mail::to($details['to'])->send(new \App\Mail\RegisterMail($details));
-
+       
     }
 
     /**
@@ -92,7 +95,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return view('/view_employee');
+        // dd("hi");
+        // return view('/view_employee');
     }
 
     /**
@@ -117,9 +121,29 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function updates(Request $request, User $user)
     {
-        //
+        // dd();
+        request()->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'photo' => ['mimes:jpg,png,jpeg,gif,svg|max:5120'],
+        ]); 
+        if($request->photo == ""){
+
+            DB::update('update users set name = ?,email=?,designation=? where id = ?',[$request->name,$request->email,$request->designation,$request->id]);
+
+        }else{
+
+            $img= time().'.'.$request->photo->extension();
+            $request->photo->move(public_path('images'), $img);
+            DB::update('update users set name = ?,email=?,designation=?,photo=? where id = ?',[$request->name,$request->email,$request->designation,$img, $request->id]);
+
+        }
+
+        $user->update($request->all());
+        $message ="User details updated successfully";
+        return redirect()->back()->with('success',$message);
     }
 
     /**
@@ -128,9 +152,12 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function delete(Request $request,User $user)
     {
-        //
+        
+        DB::delete('delete from users WHERE id = ?', [$request->id]);
+        return redirect()->back()->with('success','deleted');
+        // dd($request->id);
     }
     public function view()
     {

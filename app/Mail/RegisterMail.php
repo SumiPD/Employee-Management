@@ -16,9 +16,10 @@ class RegisterMail extends Mailable
      *
      * @return void
      */
-    public function __construct($details)
+    public function __construct($mailData)
     {
-        $this->details = $details;
+        // $this->details = $details;
+        $this->mailData = $mailData;
     }
 
     /**
@@ -28,12 +29,16 @@ class RegisterMail extends Mailable
      */
     public function build()
     {
+        $mail_data = $this->mailData;
+        $body = $mail_data['body'];
+        return $this->markdown('register_mail',['body'=>$body])
+              ->with('mailData', $this->mailData);
         
-        $email =  $this->subject($this->details['subject'])
-                    ->view('register_mail')
-                    ->from($this->details['from'])
-                    ->to($this->details['to']);
-                    // dd($email) ;      
-       return $email;
+    //     $email =  $this->subject($this->details['subject'])
+    //                 ->view('register_mail')
+    //                 ->from($this->details['from'])
+    //                 ->to($this->details['to']);
+    //                 // dd($email) ;      
+    //    return $email;
     }
 }

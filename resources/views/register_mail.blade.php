@@ -4,6 +4,6 @@
     <title>Test Mail</title>
 </head>
 <body>
-“Your account has been created”
+{{$body}}
 </body>
 </html>
